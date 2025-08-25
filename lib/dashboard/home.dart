@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/drawer.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
-import 'package:apk_absen/models/kehadiran.dart';
 import 'package:apk_absen/preference/login.dart';
+import 'package:apk_absen/sqflite/db_helper.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,7 +14,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<String> titles = ['Hadir', 'Izin', 'Sakit', 'Alpha'];
-  List<Color> colors = [Colors.blue, Colors.amber, Colors.green, Colors.red];
+  List<Color> colors = [
+    const Color.fromARGB(255, 4, 39, 235),
+    Colors.amber,
+    Colors.green,
+    Colors.red,
+  ];
   List<double> values = [0, 0, 0, 0]; // default kosong dulu
   String? userName;
   int isSelectedIdx = -1;
@@ -23,42 +27,51 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _loadData(); 
+    _loadData();
     _loadUserData();
   }
 
   Future<void> _loadData() async {
-  final userId = await PreferenceHandler.getUserId();
-  if (userId == null) return;
+    final userId = await PreferenceHandler.getUserId();
+    if (userId == null) return;
 
-  final data = await DbHelper.getKehadiranByUser(userId);
+    final data = await DbHelper.getKehadiranByUser(userId);
 
-  int hadir = data.where((e) => e.status == "Hadir").length;
-  int izin = data.where((e) => e.status == "Izin").length;
-  int sakit = data.where((e) => e.status == "Sakit").length;
-  int alpha = data.where((e) => e.status == "Alpha").length;
+    int hadir = data.where((e) => e.status == "Hadir").length;
+    int izin = data.where((e) => e.status == "Izin").length;
+    int sakit = data.where((e) => e.status == "Sakit").length;
+    int alpha = data.where((e) => e.status == "Alpha").length;
 
-  setState(() {
-    values = [hadir.toDouble(), izin.toDouble(), sakit.toDouble(), alpha.toDouble()];
-  });
-}
-
-
-  Future<void> _loadUserData() async {
-    final nama = await PreferenceHandler.getNama(); 
     setState(() {
-      userName = nama ?? "User"; 
+      values = [
+        hadir.toDouble(),
+        izin.toDouble(),
+        sakit.toDouble(),
+        alpha.toDouble(),
+      ];
     });
   }
+
+  Future<void> _loadUserData() async {
+    final nama = await PreferenceHandler.getNama();
+    setState(() {
+      userName = nama ?? "User";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "Home",
-          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Gilroy_Regular"),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: "Gilroy_Regular",
+            color: Colors.white,
+          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        backgroundColor: const Color(0xFF3338A0),
         centerTitle: true,
       ),
       drawer: const DrawerMenu(),
@@ -68,7 +81,10 @@ class _HomeState extends State<Home> {
           children: [
             const Padding(
               padding: EdgeInsets.all(10),
-              child: Text("Selamat Datang, ", style: TextStyle(fontFamily: "Gilroy_Bold", fontSize: 20,),),
+              child: Text(
+                "Selamat Datang, ",
+                style: TextStyle(fontFamily: "Gilroy_Bold", fontSize: 20),
+              ),
             ),
 
             Padding(
@@ -77,7 +93,7 @@ class _HomeState extends State<Home> {
                 height: 150,
                 width: 350,
                 child: Card(
-                  color: const Color.fromARGB(255, 15, 216, 166),
+                  color: const Color(0xFF4B70F5),
                   child: Row(
                     children: [
                       Padding(
@@ -87,14 +103,14 @@ class _HomeState extends State<Home> {
                           width: 80,
                           decoration: const BoxDecoration(
                             image: DecorationImage(
-                              image: AssetImage("assets/images/jiso.jpg"),
+                              image: AssetImage("assets/images/uniform.jpg"),
                               fit: BoxFit.cover,
                             ),
                             shape: BoxShape.circle,
                           ),
                         ),
                       ),
-                       Padding(
+                      Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,19 +118,19 @@ class _HomeState extends State<Home> {
                             Text(
                               userName ?? "Loading...", // Tampilkan NAMA user
                               style: TextStyle(
-                                color: Colors.black, 
+                                color: Colors.white,
                                 fontFamily: "Gilroy_Bold",
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(height: 10),
                             Text(
-                              "Siswa", 
+                              "Siswa",
                               style: TextStyle(
-                                color: Colors.black, 
+                                color: Colors.white,
                                 fontFamily: "Gilroy_Bold",
-                                fontSize: 14
+                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -132,7 +148,7 @@ class _HomeState extends State<Home> {
                 height: 250,
                 width: 350,
                 child: Card(
-                  color: const Color.fromARGB(255, 15, 216, 166),
+                  color: const Color(0xFF4B70F5),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -155,22 +171,21 @@ class _HomeState extends State<Home> {
                                   return;
                                 }
                                 setState(() {
-                                  isSelectedIdx = response.touchedSection!.touchedSectionIndex;
+                                  isSelectedIdx = response
+                                      .touchedSection!
+                                      .touchedSectionIndex;
                                 });
                               },
                             ),
-                            sections: List.generate(
-                              titles.length,
-                              (index) {
-                                bool isSelected = index == isSelectedIdx;
-                                return PieChartSectionData(
-                                  title: titles[index],
-                                  value: values[index],
-                                  color: colors[index],
-                                  radius: isSelected ? 70 : 50,
-                                );
-                              },
-                            ),
+                            sections: List.generate(titles.length, (index) {
+                              bool isSelected = index == isSelectedIdx;
+                              return PieChartSectionData(
+                                title: titles[index],
+                                value: values[index],
+                                color: colors[index],
+                                radius: isSelected ? 70 : 50,
+                              );
+                            }),
                           ),
                         ),
                       ),
@@ -193,7 +208,9 @@ class _HomeState extends State<Home> {
                                   ),
                                 ),
                                 const SizedBox(width: 5),
-                                Text("${titles[index]}: ${values[index].toInt()}"),
+                                Text(
+                                  "${titles[index]}: ${values[index].toInt()}",
+                                ),
                               ],
                             ),
                           );
