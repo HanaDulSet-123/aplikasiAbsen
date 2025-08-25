@@ -5,7 +5,7 @@ class PreferenceHandler {
   static const String namaKey = "nama";
   static const String emailKey = "email";
   static const String userIdKey = "userId";
-  
+
   static void saveLogin(int userId, String email, String nama) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(loginKey, true);
@@ -28,7 +28,7 @@ class PreferenceHandler {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(namaKey);
   }
-  
+
   static Future<String?> getEmail() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(emailKey);
