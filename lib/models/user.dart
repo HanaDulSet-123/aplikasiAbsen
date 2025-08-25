@@ -6,10 +6,22 @@ class User {
   final String nama;
   final String email;
   final String? password;
-  User({this.id, required this.nama, required this.email, this.password});
+  final String? foto;
+  User({
+    this.id,
+    required this.nama,
+    required this.email,
+    this.password,
+    this.foto,
+  });
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{'id': id, 'nama': nama, 'email': email, 'password': password};
+    return <String, dynamic>{
+      'id': id,
+      'nama': nama,
+      'email': email,
+      'password': password,
+    };
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
