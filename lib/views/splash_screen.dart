@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:apk_absen/dashboard/home.dart';
+import 'package:apk_absen/dashboard/buttom_nav.dart';
 import 'package:apk_absen/preference/login.dart';
 import 'package:apk_absen/utils/app_image.dart';
 import 'package:apk_absen/views/login_screen.dart';
@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(Duration(seconds: 3)).then((value) async {
       print(isLogin);
       if (isLogin == true) {
-        context.pushReplacementNamed(Home.id);
+        context.pushReplacementNamed(ButtomNav.id);
       } else {
         context.push(Login());
       }
@@ -43,7 +43,8 @@ class _SplashScreenState extends State<SplashScreen> {
             SizedBox(
               height: 200,
               width: 200,
-              child: Image.asset(AppImage.logo,)),
+              child: Image.asset(AppImage.logo),
+            ),
             SizedBox(height: 20),
             Text("Welcome"),
           ],
