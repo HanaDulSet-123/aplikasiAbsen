@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/drawer.dart';
 import 'package:apk_absen/models/kehadiran.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
 import 'package:apk_absen/preference/login.dart';
+import 'package:apk_absen/sqflite/db_helper.dart';
+import 'package:flutter/material.dart';
 
 class LaporanScreen extends StatefulWidget {
   const LaporanScreen({super.key});
@@ -33,12 +33,9 @@ class _LaporanScreenState extends State<LaporanScreen> {
       appBar: AppBar(
         title: const Text(
           "Laporan",
-          style: TextStyle(
-            fontFamily: "Gilroy_Regular",
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        backgroundColor: const Color(0xFF3338A0),
         centerTitle: true,
       ),
       drawer: const DrawerMenu(),
@@ -61,7 +58,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
             String bulanParam = (index + 1).toString().padLeft(2, "0");
 
             return _BulanListItem(bulan: namaBulan, bulanParam: bulanParam);
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -177,9 +174,9 @@ class _DetailLaporanPageState extends State<DetailLaporanPage> {
       appBar: AppBar(
         title: Text(
           "Laporan ${widget.bulan}",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        backgroundColor: const Color(0xFF3338A0),
         centerTitle: true,
       ),
       body: isLoading
@@ -190,7 +187,7 @@ class _DetailLaporanPageState extends State<DetailLaporanPage> {
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: Card(
-                    color: Colors.greenAccent,
+                    color: const Color.fromARGB(255, 105, 220, 240),
                     child: SizedBox(
                       height: 200,
                       width: 400,
@@ -214,7 +211,6 @@ class _DetailLaporanPageState extends State<DetailLaporanPage> {
                     ),
                   ),
                 ),
-                
               ],
             ),
     );
