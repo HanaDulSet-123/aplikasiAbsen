@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/buttom_nav.dart';
-import 'package:apk_absen/views/list_kehadiran.dart';
-import 'package:apk_absen/views/laporan_screen.dart';
-import 'package:apk_absen/views/login_screen.dart';
 import 'package:apk_absen/extension/navigation.dart';
+import 'package:apk_absen/views/laporan_screen.dart';
+import 'package:apk_absen/views/list_kehadiran.dart';
+import 'package:flutter/material.dart';
 
 class DrawerMenu extends StatefulWidget {
   const DrawerMenu({super.key});
@@ -37,16 +36,17 @@ class _DrawerMenuState extends State<DrawerMenu> {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
               image: DecorationImage(
-                image: AssetImage('assets/images/logo_app.png'),
+                image: AssetImage('assets/images/sekulbg.png'),
                 fit: BoxFit.cover,
               ),
             ),
             child: Text(
-              'MyAbsence',
+              'Hadir',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: const Color.fromARGB(255, 15, 216, 166),
+                color: const Color(0xFF6B240C),
                 fontSize: 30,
                 fontFamily: "Lobster",
                 fontWeight: FontWeight.bold,
