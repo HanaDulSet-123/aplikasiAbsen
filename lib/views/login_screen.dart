@@ -1,10 +1,10 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/buttom_nav.dart';
+import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/preference/login.dart';
 import 'package:apk_absen/sqflite/db_helper.dart';
 import 'package:apk_absen/views/register_screen.dart';
-import 'package:apk_absen/extension/navigation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -24,7 +24,7 @@ class _MyWidgetState extends State<Login> {
     setState(() => isLoading = true);
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Email dan Password tidak boleh kosong")),
@@ -32,9 +32,24 @@ class _MyWidgetState extends State<Login> {
       setState(() => isLoading = false);
       return;
     }
-    
+
     final userData = await DbHelper.loginUser(email, password);
     if (userData != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundImage: userData.foto != null
+                    ? NetworkImage(userData.foto!)
+                    : const AssetImage("assets/images/sekulbg.png")
+                          as ImageProvider,
+              ),
+            ],
+          ),
+        ),
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Selamat datang, ${userData.nama}")),
       );
@@ -56,10 +71,10 @@ class _MyWidgetState extends State<Login> {
           children: [
             Container(
               height: MediaQuery.of(context).size.height * 0.25,
-              color: const Color.fromARGB(255, 150, 144, 144),
+              color: const Color(0xFF3338A0),
               alignment: Alignment.center,
               child: const Text(
-                'MyAbsence',
+                'Hadir!',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -68,6 +83,11 @@ class _MyWidgetState extends State<Login> {
                 ),
               ),
             ),
+            // CircleAvatar(
+            //   radius: 18,
+            //   backgroundImage:
+            //       AssetImage("assets/images/hadir.png") as ImageProvider,
+            // ),
             Padding(
               padding: const EdgeInsets.all(25),
               child: Column(
@@ -151,7 +171,9 @@ class _MyWidgetState extends State<Login> {
                             padding: const EdgeInsets.only(left: 210),
                             child: Text(
                               "Forgot Password?",
-                              style: TextStyle(color: Colors.deepOrange[700]),
+                              style: TextStyle(
+                                color: const Color.fromARGB(255, 3, 53, 92),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -160,7 +182,7 @@ class _MyWidgetState extends State<Login> {
                             height: 50,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:  Colors.deepOrange,
+                                backgroundColor: const Color(0xFF1C6EA4),
                                 side: const BorderSide(
                                   color: Colors.orangeAccent,
                                   width: 2,
@@ -170,16 +192,18 @@ class _MyWidgetState extends State<Login> {
                                 ),
                               ),
                               onPressed: login,
-                              child: isLoading 
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text(
-                                    "Sign In",
-                                    style: TextStyle(
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                    )
+                                  : const Text(
+                                      "Sign In",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -243,7 +267,12 @@ class _MyWidgetState extends State<Login> {
                               TextSpan(
                                 text: "Don't have an account? ",
                                 style: TextStyle(
-                                  color: const Color.fromARGB(182, 100, 100, 106),
+                                  color: const Color.fromARGB(
+                                    182,
+                                    100,
+                                    100,
+                                    106,
+                                  ),
                                   fontFamily: "Poppins_Regular",
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -256,7 +285,12 @@ class _MyWidgetState extends State<Login> {
                                     text: " Register",
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: const Color.fromARGB(255, 11, 39, 164),
+                                      color: const Color.fromARGB(
+                                        255,
+                                        11,
+                                        39,
+                                        164,
+                                      ),
                                       fontFamily: "Poppins_Bold",
                                     ),
                                   ),
