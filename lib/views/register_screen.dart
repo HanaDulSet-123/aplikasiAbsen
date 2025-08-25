@@ -1,190 +1,267 @@
-import 'package:apk_absen/dashboard/drawer.dart';
-import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/models/user.dart';
-import 'package:apk_absen/preference/login.dart';
 import 'package:apk_absen/sqflite/db_helper.dart';
-import 'package:apk_absen/textForm/text_form.dart';
-import 'package:apk_absen/views/login_screen.dart';
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
-  static const id = "/profile";
-
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+  static const id = "/register";
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  User? currentUser;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    getCurrentUser();
-  }
-
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController namaController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-
-  Future<void> getCurrentUser() async {
-    final userId = await PreferenceHandler.getUserId();
-    final userEmail = await PreferenceHandler.getEmail();
-    final userName = await PreferenceHandler.getNama();
-
-    if (userId != null) {
-      final allUsers = await DbHelper.getAllUser();
-      final userFromDb = allUsers.firstWhere(
-        (user) => user.id == userId,
-        orElse: () => User(id: -1, nama: '', email: ''),
-      );
-      if (userFromDb.id != -1) {
-        setState(() {
-          currentUser = userFromDb;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          currentUser = User(
-            id: userId,
-            nama: userName ?? 'User',
-            email: userEmail ?? 'No Email',
-          );
-          isLoading = false;
-        });
-      }
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _updateUser() async {
-    if (currentUser == null) return;
-
-    final updatedUser = User(
-      id: currentUser!.id,
-      nama: namaController.text,
-      email: emailController.text,
-      password: currentUser!.password,
-    );
-
-    await DbHelper.updateUser(updatedUser);
-
-    // Update juga di shared preferences menggunakan PreferenceHandler
-    await PreferenceHandler.setNama(updatedUser.nama);
-    await PreferenceHandler.setEmail(updatedUser.email);
-
-    setState(() {
-      currentUser = updatedUser;
-    });
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Profile berhasil diupdate')));
-  }
-
+  final TextEditingController passwordController = TextEditingController();
+  // final TextEditingController asalKotaController = TextEditingController();
+  bool isVisibility = false;
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Profile", style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF3338A0),
-      ),
-      drawer: DrawerMenu(),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : currentUser == null
-          ? Center(child: Text('User tidak ditemukan'))
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Profile Card
-                Card(
-                  margin: EdgeInsets.all(16),
-                  color: const Color(0xFF3338A0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: AssetImage(
-                            "assets/images/uniform.jpg",
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          currentUser!.nama,
+    return Scaffold(body: Stack(children: [buildBackground(), buildLayer()]));
+  }
+
+  void registerUser() async {
+    isLoading = true;
+    setState(() {});
+    final nama = namaController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    // final asalKota = asalKotaController.text.trim();
+    if (nama.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Nama, Email, dan Password tidak boleh kosong"),
+        ),
+      );
+      isLoading = false;
+
+      return;
+    }
+    final user = User(nama: nama, email: email, password: password);
+    await DbHelper.registerUser(user);
+    Future.delayed(const Duration(seconds: 1)).then((value) {
+      isLoading = false;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Pendaftaran berhasil")));
+    });
+    setState(() {});
+    isLoading = false;
+    Navigator.pushReplacementNamed(context, "/login");
+  }
+
+  SafeArea buildLayer() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Register",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Gilroy_Medium",
+                ),
+              ),
+              height(24),
+              buildTitle("Nama"),
+              height(24),
+              buildTitle("Email"),
+              height(12),
+              buildTitle("Password"),
+              height(12),
+              buildTextField(
+                hintText: "Input nama",
+                controller: namaController,
+              ),
+              height(12),
+              buildTextField(
+                hintText: "Input email",
+                controller: emailController,
+              ),
+              height(16),
+              buildTitle("Password"),
+              height(12),
+              buildTextField(
+                hintText: "Input password",
+                isPassword: true,
+                controller: passwordController,
+              ),
+              height(12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => MeetSebelas()),
+                    // );
+                  },
+                  child: Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      fontSize: 12,
+                      // color: AppColor.orange,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              height(24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    registerUser();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator()
+                      : Text(
+                          "Daftar",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          currentUser!.email,
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                        SizedBox(height: 16),
-                      ],
+                ),
+              ),
+              height(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(right: 8),
+                      height: 1,
+                      color: Colors.white,
                     ),
                   ),
-                ),
+                  Text(
+                    "Or Sign In With",
+                    // style: TextStyle(fontSize: 12, color: AppColor.gray88),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(left: 8),
 
-                // Edit Form
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        TextFormConst(
-                          controller: namaController..text = currentUser!.nama,
-                          hintText: 'Nama',
-                        ),
-                        SizedBox(height: 12),
-                        TextFormConst(
-                          controller: emailController
-                            ..text = currentUser!.email,
-                          hintText: 'Email',
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _updateUser,
-                          child: Text(
-                            'Update Profile',
-                          ),
-                          
-                        ),
-                      ],
+                      height: 1,
+                      color: Colors.white,
                     ),
                   ),
-                ),
+                ],
+              ),
 
-                // Logout Button
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      PreferenceHandler.removeLogin();
-                      context.pushReplacementNamed(Login.id);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 94, 86, 85),
-                    ),
-                    child: Text(
-                      "Logout",
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 243, 237, 237),
-                      ),
-                    ),
+              height(16),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    // Navigate to MeetLima screen menggunakan pushnamed
+                    Navigator.pushNamed(context, "/login");
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Image.asset(
+                      //   "assets/images/google.png",
+                      //   height: 16,
+                      //   width: 16,
+                      // ),
+                      width(4),
+                      Text("Login"),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container buildBackground() {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        // image: DecorationImage(
+        //   image: AssetImage("assets/images/hadir.png"),
+        //   fit: BoxFit.cover,
+        // ),
+      ),
+    );
+  }
+
+  TextField buildTextField({
+    String? hintText,
+    bool isPassword = false,
+    TextEditingController? controller,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword ? isVisibility : false,
+      decoration: InputDecoration(
+        hintText: hintText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(32),
+          borderSide: BorderSide(
+            color: Colors.black.withOpacity(0.2),
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(32),
+          borderSide: BorderSide(color: Colors.black, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(32),
+          borderSide: BorderSide(
+            color: Colors.black.withOpacity(0.2),
+            width: 1.0,
+          ),
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    isVisibility = !isVisibility;
+                  });
+                },
+                icon: Icon(
+                  isVisibility ? Icons.visibility_off : Icons.visibility,
+                  // color: AppColor.gray88,
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+
+  SizedBox height(double height) => SizedBox(height: height);
+  SizedBox width(double width) => SizedBox(width: width);
+
+  Widget buildTitle(String text) {
+    return Row(
+      children: [
+        // Text(text, style: TextStyle(fontSize: 12, color: AppColor.gray88)),
+      ],
     );
   }
 }
