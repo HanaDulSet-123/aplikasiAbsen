@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:apk_absen/dashboard/drawer.dart';
 import 'package:apk_absen/models/kehadiran.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
 import 'package:apk_absen/preference/login.dart';
+import 'package:apk_absen/sqflite/db_helper.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ListKehadiran extends StatefulWidget {
   const ListKehadiran({super.key});
@@ -14,7 +14,7 @@ class ListKehadiran extends StatefulWidget {
 
 class _ListKehadiranState extends State<ListKehadiran> {
   List<Kehadiran> kehadiran = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +24,7 @@ class _ListKehadiranState extends State<ListKehadiran> {
   Future<void> _loadKehadiran() async {
     final userId = await PreferenceHandler.getUserId();
     if (userId == null) return;
-    
+
     final data = await DbHelper.getKehadiranByUser(userId);
     setState(() {
       kehadiran = data;
@@ -33,7 +33,7 @@ class _ListKehadiranState extends State<ListKehadiran> {
 
   Future<void> _deleteKehadiran(int id) async {
     await DbHelper.deleteKehadiran(id);
-    _loadKehadiran();                   
+    _loadKehadiran();
   }
 
   Future<void> _confirmDelete(int id) async {
@@ -43,7 +43,9 @@ class _ListKehadiranState extends State<ListKehadiran> {
         return AlertDialog(
           title: const Text("Konfirmasi Hapus"),
           content: const Text("Apakah kamu yakin ingin menghapus data ini?"),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -51,8 +53,8 @@ class _ListKehadiranState extends State<ListKehadiran> {
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context); 
-                await _deleteKehadiran(id); 
+                Navigator.pop(context);
+                await _deleteKehadiran(id);
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text("Hapus"),
@@ -67,8 +69,15 @@ class _ListKehadiranState extends State<ListKehadiran> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Kehadiran", style: TextStyle(fontFamily: "Gilroy_Regular", fontWeight: FontWeight.bold)),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        title: Text(
+          "Kehadiran",
+          style: TextStyle(
+            fontFamily: "Gilroy_Regular",
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF3338A0),
         centerTitle: true,
       ),
       drawer: DrawerMenu(),
@@ -77,14 +86,13 @@ class _ListKehadiranState extends State<ListKehadiran> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TambahKehadiranPage(
-                onKehadiranAdded: _loadKehadiran,
-              ),
+              builder: (context) =>
+                  TambahKehadiranPage(onKehadiranAdded: _loadKehadiran),
             ),
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        backgroundColor: const Color(0xFF3338A0),
+        child: Icon(Icons.add, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
@@ -95,12 +103,25 @@ class _ListKehadiranState extends State<ListKehadiran> {
               height: 150,
               width: 382,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 15, 216, 166),
-                borderRadius: BorderRadius.circular(8)
+                color: const Color(0xFF3338A0),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
-                padding: const EdgeInsets.only(left: 120, top: 55, bottom: 50, right: 50),
-                child: Text("Absen Yuk!", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: "Gilroy_Regular")),
+                padding: const EdgeInsets.only(
+                  left: 120,
+                  top: 55,
+                  bottom: 50,
+                  right: 50,
+                ),
+                child: Text(
+                  "Absen Yuk!",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Gilroy_Regular",
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
@@ -112,19 +133,22 @@ class _ListKehadiranState extends State<ListKehadiran> {
                 return Card(
                   margin: EdgeInsets.all(8),
                   child: ListTile(
-                    leading: Icon(Icons.person, color: const Color.fromARGB(255, 15, 216, 166)),
-                    title: Text(data.nama, style: TextStyle(fontSize: 18),),
+                    leading: Icon(
+                      Icons.person,
+                      color: const Color.fromARGB(255, 15, 216, 166),
+                    ),
+                    title: Text(data.nama, style: TextStyle(fontSize: 18)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(data.kelas, style: TextStyle(fontSize: 14),),
+                        Text(data.kelas, style: TextStyle(fontSize: 14)),
                         Text(data.tanggal, style: TextStyle(fontSize: 14)),
                       ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(data.status!, style: TextStyle(fontSize: 18),),
+                        Text(data.status!, style: TextStyle(fontSize: 18)),
                         SizedBox(width: 10),
                         IconButton(
                           icon: Icon(Icons.edit, color: Colors.blue),
@@ -170,7 +194,7 @@ class TambahKehadiranPage extends StatefulWidget {
 class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? selectedDate;
-  
+
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _kelasController = TextEditingController();
@@ -187,7 +211,10 @@ class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
     if (pickerDate != null) {
       setState(() {
         selectedDate = pickerDate;
-        _tanggalController.text = DateFormat('dd-MM-yyyy', 'id').format(pickerDate);
+        _tanggalController.text = DateFormat(
+          'dd-MM-yyyy',
+          'id',
+        ).format(pickerDate);
       });
     }
   }
@@ -200,14 +227,14 @@ class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
         nama: _namaController.text,
         tanggal: _tanggalController.text,
         kelas: _kelasController.text,
-        status: _statusController.text
+        status: _statusController.text,
       );
 
       await DbHelper.registerKehadiran(kehadiranData);
-      
+
       widget.onKehadiranAdded();
       Navigator.pop(context);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data kehadiran berhasil ditambahkan')),
       );
@@ -218,8 +245,15 @@ class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tambah Kehadiran", style: TextStyle(fontFamily: "Gilroy_Regular", fontWeight: FontWeight.bold)),
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        title: Text(
+          "Tambah Kehadiran",
+          style: TextStyle(
+            fontFamily: "Gilroy_Regular",
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF3338A0),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -287,13 +321,14 @@ class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
                     ),
                     labelText: "Status Kehadiran",
                   ),
-                  value: _statusController.text.isEmpty ? null : _statusController.text,
+                  value: _statusController.text.isEmpty
+                      ? null
+                      : _statusController.text,
                   hint: Text("Pilih Status Kehadiran"),
-                  items: ["Hadir", "Izin", "Sakit", "Alpha"].map((String value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(value),
-                    );
+                  items: ["Hadir", "Izin", "Sakit", "Alpha"].map((
+                    String value,
+                  ) {
+                    return DropdownMenuItem(value: value, child: Text(value));
                   }).toList(),
                   onChanged: (newValue) {
                     setState(() {
@@ -314,7 +349,7 @@ class _TambahKehadiranPageState extends State<TambahKehadiranPage> {
                   child: ElevatedButton(
                     onPressed: _simpanKehadiran,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+                      backgroundColor: const Color(0xFF3338A0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -356,7 +391,7 @@ class EditKehadiranPage extends StatefulWidget {
 class _EditKehadiranPageState extends State<EditKehadiranPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? selectedDate;
-  
+
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _kelasController = TextEditingController();
@@ -382,7 +417,10 @@ class _EditKehadiranPageState extends State<EditKehadiranPage> {
     if (pickerDate != null) {
       setState(() {
         selectedDate = pickerDate;
-        _tanggalController.text = DateFormat('dd-MM-yyyy', 'id').format(pickerDate);
+        _tanggalController.text = DateFormat(
+          'dd-MM-yyyy',
+          'id',
+        ).format(pickerDate);
       });
     }
   }
@@ -395,14 +433,14 @@ class _EditKehadiranPageState extends State<EditKehadiranPage> {
         nama: _namaController.text,
         tanggal: _tanggalController.text,
         kelas: _kelasController.text,
-        status: _statusController.text
+        status: _statusController.text,
       );
 
       await DbHelper.registerKehadiran(updatedKehadiran);
-      
+
       widget.onKehadiranUpdated();
       Navigator.pop(context);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data kehadiran berhasil diupdate')),
       );
@@ -413,7 +451,13 @@ class _EditKehadiranPageState extends State<EditKehadiranPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Kehadiran", style: TextStyle(fontFamily: "Gilroy_Regular", fontWeight: FontWeight.bold)),
+        title: Text(
+          "Edit Kehadiran",
+          style: TextStyle(
+            fontFamily: "Gilroy_Regular",
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: const Color.fromARGB(255, 15, 216, 166),
       ),
       body: Padding(
@@ -483,11 +527,10 @@ class _EditKehadiranPageState extends State<EditKehadiranPage> {
                     labelText: "Status Kehadiran",
                   ),
                   value: _statusController.text,
-                  items: ["Hadir", "Izin", "Sakit", "Alpha"].map((String value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(value),
-                    );
+                  items: ["Hadir", "Izin", "Sakit", "Alpha"].map((
+                    String value,
+                  ) {
+                    return DropdownMenuItem(value: value, child: Text(value));
                   }).toList(),
                   onChanged: (newValue) {
                     setState(() {
