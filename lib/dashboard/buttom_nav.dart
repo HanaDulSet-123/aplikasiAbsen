@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/home.dart';
 import 'package:apk_absen/views/profile_screen.dart';
+import 'package:flutter/material.dart';
 
 class ButtomNav extends StatefulWidget {
   const ButtomNav({super.key});
@@ -23,7 +23,7 @@ class _ButtomNavState extends State<ButtomNav> {
       // appBar: AppBar(title: Text("Dashbord"), backgroundColor: Colors.blue),
       body: _widgetOptions[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(255, 15, 216, 166),
+        backgroundColor: const Color(0xFF3338A0),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -37,7 +37,7 @@ class _ButtomNavState extends State<ButtomNav> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
-        unselectedItemColor: const Color.fromARGB(255, 12, 92, 65),
+        unselectedItemColor: const Color.fromARGB(255, 51, 140, 255),
         onTap: (value) {
           // print(value);
           // print("Nilai SelecetedIndex Before : $_selectedIndex");
