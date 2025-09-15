@@ -1,6 +1,5 @@
 import 'package:apk_absen/dashboard/drawer.dart';
 import 'package:apk_absen/preference/login.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -28,29 +27,16 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _loadData();
-    _loadUserData();
+    // _loadUserData();
   }
 
   Future<void> _loadData() async {
     final userId = await PreferenceHandler.getUserId();
     if (userId == null) return;
-
-    final data = await DbHelper.getKehadiranByUser(userId);
-
-    int hadir = data.where((e) => e.status == "Hadir").length;
-    int izin = data.where((e) => e.status == "Izin").length;
-    int sakit = data.where((e) => e.status == "Sakit").length;
-    int alpha = data.where((e) => e.status == "Alpha").length;
-
-    setState(() {
-      values = [
-        hadir.toDouble(),
-        izin.toDouble(),
-        sakit.toDouble(),
-        alpha.toDouble(),
-      ];
-    });
   }
+
+
+  
 
   Future<void> _loadUserData() async {
     final nama = await PreferenceHandler.getNama();

@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (isLogin == true) {
         context.pushReplacementNamed(ButtomNav.id);
       } else {
-        context.push(Login());
+        context.push(LoginScreen());
       }
     });
   }

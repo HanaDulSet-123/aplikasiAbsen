@@ -1,7 +1,5 @@
 import 'package:apk_absen/dashboard/buttom_nav.dart';
 import 'package:apk_absen/extension/navigation.dart';
-import 'package:apk_absen/views/laporan_screen.dart';
-import 'package:apk_absen/views/list_kehadiran.dart';
 import 'package:flutter/material.dart';
 
 class DrawerMenu extends StatefulWidget {
@@ -60,20 +58,20 @@ class _DrawerMenuState extends State<DrawerMenu> {
               context.push(ButtomNav());
             },
           ),
-          ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Kehadiran"),
-            onTap: () {
-              context.push(ListKehadiran());
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.report),
-            title: Text("Laporan"),
-            onTap: () {
-              context.push(LaporanScreen());
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.list),
+          //   title: Text("Kehadiran"),
+          //   onTap: () {
+          //     context.push(ListKehadiran());
+          //   },
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.report),
+          //   title: Text("Laporan"),
+          //   onTap: () {
+          //     context.push(LaporanScreen());
+          //   },
+          // ),
         ],
       ),
     );

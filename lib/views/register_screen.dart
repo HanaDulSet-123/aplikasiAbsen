@@ -1,10 +1,12 @@
 import 'package:apk_absen/models/user.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
+import 'package:apk_absen/views/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
   static const id = "/register";
+
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -13,198 +15,165 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController namaController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  // final TextEditingController asalKotaController = TextEditingController();
   bool isVisibility = false;
   bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Stack(children: [buildBackground(), buildLayer()]));
+    return Scaffold(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            buildBackground(),
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xCC1976D2),
+                    Color(0xCC42A5F5),
+                    Color(0xCC90CAF9),
+                  ],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Register",
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.black.withOpacity(0.7),
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                        height(24),
+                        buildTextField(
+                          hintText: "Nama Lengkap",
+                          controller: namaController,
+                        ),
+                        height(16),
+                        buildTextField(
+                          hintText: "Email",
+                          controller: emailController,
+                        ),
+                        height(16),
+                        buildTextField(
+                          hintText: "Password",
+                          controller: passwordController,
+                          isPassword: true,
+                        ),
+                        height(32),
+                        SizedBox(
+                          height: 48,
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                            ),
+                            onPressed: registerUser,
+                            child: const Text(
+                              "Daftar",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        height(16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Sudah punya akun?",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Login",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void registerUser() async {
-    isLoading = true;
-    setState(() {});
+    setState(() => isLoading = true);
+
     final nama = namaController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    // final asalKota = asalKotaController.text.trim();
+
     if (nama.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Nama, Email, dan Password tidak boleh kosong"),
         ),
       );
-      isLoading = false;
-
+      setState(() => isLoading = false);
       return;
     }
+
     final user = User(nama: nama, email: email, password: password);
-    await DbHelper.registerUser(user);
+    // await DbHelper.registerUser(user);
+
     Future.delayed(const Duration(seconds: 1)).then((value) {
-      isLoading = false;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Pendaftaran berhasil")));
+      setState(() => isLoading = false);
+      Navigator.pushReplacementNamed(context, "/login");
     });
-    setState(() {});
-    isLoading = false;
-    Navigator.pushReplacementNamed(context, "/login");
-  }
-
-  SafeArea buildLayer() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            // crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Register",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Gilroy_Medium",
-                ),
-              ),
-              height(24),
-              buildTitle("Nama"),
-              height(24),
-              buildTitle("Email"),
-              height(12),
-              buildTitle("Password"),
-              height(12),
-              buildTextField(
-                hintText: "Input nama",
-                controller: namaController,
-              ),
-              height(12),
-              buildTextField(
-                hintText: "Input email",
-                controller: emailController,
-              ),
-              height(16),
-              buildTitle("Password"),
-              height(12),
-              buildTextField(
-                hintText: "Input password",
-                isPassword: true,
-                controller: passwordController,
-              ),
-              height(12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => MeetSebelas()),
-                    // );
-                  },
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(
-                      fontSize: 12,
-                      // color: AppColor.orange,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              height(24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    registerUser();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  child: isLoading
-                      ? CircularProgressIndicator()
-                      : Text(
-                          "Daftar",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-              ),
-              height(16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(right: 8),
-                      height: 1,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    "Or Sign In With",
-                    // style: TextStyle(fontSize: 12, color: AppColor.gray88),
-                  ),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 8),
-
-                      height: 1,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-
-              height(16),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    // Navigate to MeetLima screen menggunakan pushnamed
-                    Navigator.pushNamed(context, "/login");
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Image.asset(
-                      //   "assets/images/google.png",
-                      //   height: 16,
-                      //   width: 16,
-                      // ),
-                      width(4),
-                      Text("Login"),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Container buildBackground() {
     return Container(
       height: double.infinity,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        // image: DecorationImage(
-        //   image: AssetImage("assets/images/hadir.png"),
-        //   fit: BoxFit.cover,
-        // ),
+      color: Colors.white,
+      child: Center(
+        child: Image.asset(
+          "assets/image/hadir.png",
+          width: 200,
+          height: 200,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -216,27 +185,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword ? isVisibility : false,
+      obscureText: isPassword ? !isVisibility : false,
       decoration: InputDecoration(
         hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: BorderSide(
-            color: Colors.black.withOpacity(0.2),
-            width: 1.0,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: BorderSide(color: Colors.black, width: 1.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: BorderSide(
-            color: Colors.black.withOpacity(0.2),
-            width: 1.0,
-          ),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
         suffixIcon: isPassword
             ? IconButton(
                 onPressed: () {
@@ -245,8 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   });
                 },
                 icon: Icon(
-                  isVisibility ? Icons.visibility_off : Icons.visibility,
-                  // color: AppColor.gray88,
+                  isVisibility ? Icons.visibility : Icons.visibility_off,
                 ),
               )
             : null,
@@ -254,14 +205,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  SizedBox height(double height) => SizedBox(height: height);
-  SizedBox width(double width) => SizedBox(width: width);
-
-  Widget buildTitle(String text) {
-    return Row(
-      children: [
-        // Text(text, style: TextStyle(fontSize: 12, color: AppColor.gray88)),
-      ],
-    );
-  }
+  SizedBox height(double h) => SizedBox(height: h);
+  SizedBox width(double w) => SizedBox(width: w);
 }

@@ -2,7 +2,6 @@ import 'package:apk_absen/dashboard/drawer.dart';
 import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/models/user.dart';
 import 'package:apk_absen/preference/login.dart';
-import 'package:apk_absen/sqflite/db_helper.dart';
 import 'package:apk_absen/textForm/text_form.dart';
 import 'package:apk_absen/views/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -33,32 +32,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userEmail = await PreferenceHandler.getEmail();
     final userName = await PreferenceHandler.getNama();
 
-    if (userId != null) {
-      final allUsers = await DbHelper.getAllUser();
-      final userFromDb = allUsers.firstWhere(
-        (user) => user.id == userId,
-        orElse: () => User(id: -1, nama: '', email: ''),
-      );
-      if (userFromDb.id != -1) {
-        setState(() {
-          currentUser = userFromDb;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          currentUser = User(
-            id: userId,
-            nama: userName ?? 'User',
-            email: userEmail ?? 'No Email',
-          );
-          isLoading = false;
-        });
-      }
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    // if (userId != null) {
+    //   final allUsers = await DbHelper.getAllUser();
+    //   final userFromDb = allUsers.firstWhere(
+    //     (user) => user.id == userId,
+    //     orElse: () => User(id: -1, nama: '', email: ''),
+    //   );
+    //   if (userFromDb.id != -1) {
+    //     setState(() {
+    //       currentUser = userFromDb;
+    //       isLoading = false;
+    //     });
+    //   } else {
+    //     setState(() {
+    //       currentUser = User(
+    //         id: userId,
+    //         nama: userName ?? 'User',
+    //         email: userEmail ?? 'No Email',
+    //       );
+    //       isLoading = false;
+    //     });
+    //   }
+    // } else {
+    //   setState(() {
+    //     isLoading = false;
+    //   });
+    // }
   }
 
   Future<void> _updateUser() async {
@@ -70,8 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email: emailController.text,
       password: currentUser!.password,
     );
-
-    await DbHelper.updateUser(updatedUser);
+// 
+    // await DbHelper.updateUser(updatedUser);
 
     // Update juga di shared preferences menggunakan PreferenceHandler
     await PreferenceHandler.setNama(updatedUser.nama);
@@ -154,10 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _updateUser,
-                          child: Text(
-                            'Update Profile',
-                          ),
-                          
+                          child: Text('Update Profile'),
                         ),
                       ],
                     ),
@@ -170,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       PreferenceHandler.removeLogin();
-                      context.pushReplacementNamed(Login.id);
+                      context.push(LoginScreen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 94, 86, 85),
