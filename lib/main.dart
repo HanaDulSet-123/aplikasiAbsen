@@ -1,5 +1,4 @@
 import 'package:apk_absen/dashboard/buttom_nav.dart';
-import 'package:apk_absen/dashboard/home.dart';
 import 'package:apk_absen/views/login_screen.dart';
 import 'package:apk_absen/views/profile_screen.dart';
 import 'package:apk_absen/views/splash_screen.dart';
@@ -44,10 +43,11 @@ class MyApp extends StatelessWidget {
       ),
       home: SplashScreen(),
       routes: {
-        Home.id: (context) => Home(),
+        // Home.id: (context) => Home(),
         ButtomNav.id: (context) => ButtomNav(),
         LoginScreen.id: (context) => LoginScreen(),
         ProfileScreen.id: (context) => ProfileScreen(),
+        
         // home: LoginScreen(),
       },
     );

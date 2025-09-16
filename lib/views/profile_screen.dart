@@ -1,4 +1,4 @@
-import 'package:apk_absen/dashboard/drawer.dart';
+
 import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/models/user.dart';
 import 'package:apk_absen/preference/login.dart';
@@ -92,7 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text("Profile", style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF3338A0),
       ),
-      drawer: DrawerMenu(),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : currentUser == null

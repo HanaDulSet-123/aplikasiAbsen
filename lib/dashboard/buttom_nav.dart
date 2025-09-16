@@ -1,4 +1,4 @@
-import 'package:apk_absen/dashboard/home.dart';
+import 'package:apk_absen/views/dashboard_screen.dart';
 import 'package:apk_absen/views/profile_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,10 @@ class _ButtomNavState extends State<ButtomNav> {
   bool isCheck = false;
   bool isCheckSwitch = false;
   int _selectedIndex = 0;
-  static const List<Widget> _widgetOptions = <Widget>[Home(), ProfileScreen()];
+  static const List<Widget> _widgetOptions = <Widget>[
+    DashboardScreen(),
+    ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {

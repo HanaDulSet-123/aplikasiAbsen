@@ -1,57 +1,82 @@
+import 'package:apk_absen/views/history.dart';
+import 'package:apk_absen/views/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-void main() {
-  runApp(const DashboardScreen());
-}
-
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dashboard Absensi',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        fontFamily: 'Poppins',
-      ),
-      home: const AttendanceDashboard(),
-    );
-  }
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class AttendanceDashboard extends StatefulWidget {
-  const AttendanceDashboard({super.key});
-
-  @override
-  State<AttendanceDashboard> createState() => _AttendanceDashboardState();
-}
-
-class _AttendanceDashboardState extends State<AttendanceDashboard> {
+class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   final DateTime _selectedDate = DateTime.now();
-  final List<Map<String, dynamic>> _attendanceData = [
-    {
-      'date': '2023-10-01',
-      'check_in': '08:00',
-      'check_out': '17:00',
-      'status': 'Hadir',
-    },
-  ];
+
+  /// Simpan riwayat absensi
+  final List<Map<String, dynamic>> _attendanceData = [];
+
+  /// Fungsi tambah data absensi
+  void _addAttendance() {
+    final now = DateTime.now();
+
+    // Status hadir/terlambat
+    String status;
+    if (now.hour < 8 || (now.hour == 8 && now.minute <= 00)) {
+      status = "Hadir";
+    } else {
+      status = "Terlambat";
+    }
+
+    setState(() {
+      _attendanceData.insert(0, {
+        'date': DateFormat('yyyy-MM-dd').format(now),
+        'check_in': DateFormat('HH:mm').format(now),
+        'check_out': '',
+        'status': status,
+      });
+    });
+  }
+
+  void _checkOut() {
+    final now = DateTime.now();
+
+    setState(() {
+      if (_attendanceData.isNotEmpty) {
+        // ambil data terakhir yang belum ada checkout
+        final last = _attendanceData[0];
+
+        if (last['check_out'] == '') {
+          last['check_out'] = DateFormat('HH:mm').format(now);
+
+          // Update status kalau pulang cepat
+          if (now.hour < 17) {
+            last['status'] = "Pulang Cepat";
+          }
+        }
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Check Out berhasil dicatat'),
+        backgroundColor: Colors.purple,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Absensi',
+          'AbDul',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -68,29 +93,19 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header dengan info user dan tanggal
             _buildHeader(),
             const SizedBox(height: 24),
-
-            // Card statistik absensi
             _buildStatsCard(),
             const SizedBox(height: 24),
-
-            // Card untuk check-in/check-out
             _buildCheckInOutCard(),
             const SizedBox(height: 24),
-
-            // Riwayat absensi
             _buildAttendanceHistory(),
           ],
         ),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Action untuk absensi
-          _showAttendanceDialog(context);
-        },
+        onPressed: () => _showAttendanceDialog(context),
         backgroundColor: Colors.blue,
         child: const Icon(Icons.fingerprint, color: Colors.white),
       ),
@@ -98,26 +113,19 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
     );
   }
 
+  /// HEADER
   Widget _buildHeader() {
     return Row(
       children: [
-        // const CircleAvatar(
-        //   radius: 30,
-        //   backgroundImage: NetworkImage(
-        //     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-        //   ),
-        // ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'User',
+                'Hanna',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 4),
-              Text('', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
               const SizedBox(height: 4),
               Text(
                 DateFormat('EEEE, d MMMM y').format(_selectedDate),
@@ -130,6 +138,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
     );
   }
 
+  /// STAT CARD
   Widget _buildStatsCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -157,24 +166,10 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
           ),
           const SizedBox(height: 16),
           LinearProgressIndicator(
-            value: 0.85,
+            value: 0,
             backgroundColor: Colors.grey[200],
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             borderRadius: BorderRadius.circular(10),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Kehadiran Bulan Ini',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-              const Text(
-                '85%',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            ],
           ),
         ],
       ),
@@ -205,6 +200,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
     );
   }
 
+  /// CHECK IN OUT
   Widget _buildCheckInOutCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -221,20 +217,22 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildTimeCard('Check-in', '07:45', Colors.blue),
-              _buildTimeCard('Check-out', '17:15', Colors.purple),
-            ],
+          Text(
+            'Udah pulang? Jangan Lupa Check Out ya ^^',
+            style: TextStyle(fontSize: 15),
           ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     _buildTimeCard('Check-in', '', Colors.blue),
+          //     _buildTimeCard('Check-out', '', Colors.purple),
+          //   ],
+          // ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                _showAttendanceDialog(context);
-              },
+              onPressed: () => _checkOut(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -244,7 +242,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
                 ),
               ),
               child: const Text(
-                'ABSEN SEKARANG',
+                'Check Out',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -272,6 +270,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
     );
   }
 
+  /// HISTORY
   Widget _buildAttendanceHistory() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,10 +314,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
         statusColor = Colors.orange;
         break;
       case 'Pulang Cepat':
-        statusColor = Colors.orange;
-        break;
-      case 'Libur':
-        statusColor = Colors.blue;
+        statusColor = Colors.purple;
         break;
       default:
         statusColor = Colors.red;
@@ -405,44 +401,41 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
               Icons.home,
               color: _currentIndex == 0 ? Colors.blue : Colors.grey,
             ),
-            onPressed: () {
-              setState(() {
-                _currentIndex = 0;
-              });
-            },
+            onPressed: () => setState(() => _currentIndex = 0),
           ),
           IconButton(
             icon: Icon(
               Icons.calendar_today,
               color: _currentIndex == 1 ? Colors.blue : Colors.grey,
             ),
-            onPressed: () {
-              setState(() {
-                _currentIndex = 1;
-              });
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AttendanceHistoryScreen(),
+                ),
+              );
             },
           ),
-          const SizedBox(width: 40), // Space for the FAB
+
+          const SizedBox(width: 40),
           IconButton(
             icon: Icon(
               Icons.bar_chart,
               color: _currentIndex == 2 ? Colors.blue : Colors.grey,
             ),
-            onPressed: () {
-              setState(() {
-                _currentIndex = 2;
-              });
-            },
+            onPressed: () => setState(() => _currentIndex = 2),
           ),
           IconButton(
             icon: Icon(
               Icons.person,
               color: _currentIndex == 3 ? Colors.blue : Colors.grey,
             ),
-            onPressed: () {
-              setState(() {
-                _currentIndex = 3;
-              });
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
             },
           ),
         ],
@@ -488,9 +481,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -504,6 +495,7 @@ class _AttendanceDashboardState extends State<AttendanceDashboard> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
+                          _addAttendance();
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Selamat Datang',
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: 32,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -116,8 +116,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                             const Text('Ingat saya'),
-                            const Spacer(),
+                            SizedBox(width: 20),
                             TextButton(
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
