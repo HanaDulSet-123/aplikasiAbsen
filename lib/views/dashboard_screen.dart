@@ -1,5 +1,4 @@
-import 'package:apk_absen/views/history.dart';
-import 'package:apk_absen/views/profile_screen.dart';
+import 'package:apk_absen/views/google_maps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -12,17 +11,14 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
   final DateTime _selectedDate = DateTime.now();
 
-  /// Simpan riwayat absensi
   final List<Map<String, dynamic>> _attendanceData = [];
 
-  /// Fungsi tambah data absensi
   void _addAttendance() {
     final now = DateTime.now();
 
-    // Status hadir/terlambat
     String status;
     if (now.hour < 8 || (now.hour == 8 && now.minute <= 00)) {
       status = "Hadir";
@@ -45,13 +41,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     setState(() {
       if (_attendanceData.isNotEmpty) {
-        // ambil data terakhir yang belum ada checkout
         final last = _attendanceData[0];
 
         if (last['check_out'] == '') {
           last['check_out'] = DateFormat('HH:mm').format(now);
 
-          // Update status kalau pulang cepat
           if (now.hour < 17) {
             last['status'] = "Pulang Cepat";
           }
@@ -103,13 +97,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAttendanceDialog(context),
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.fingerprint, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // bottomNavigationBar: _buildBottomNavigationBar(),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _showAttendanceDialog(context),
+      //   // backgroundColor: Colors.blue,
+      //   // // child: const Icon(Icons.fingerprint, color: Colors.white),
+      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -138,7 +132,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// STAT CARD
   Widget _buildStatsCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -200,7 +193,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// CHECK IN OUT
   Widget _buildCheckInOutCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -270,7 +262,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// HISTORY
   Widget _buildAttendanceHistory() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,60 +380,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  BottomAppBar _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            icon: Icon(
-              Icons.home,
-              color: _currentIndex == 0 ? Colors.blue : Colors.grey,
-            ),
-            onPressed: () => setState(() => _currentIndex = 0),
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.calendar_today,
-              color: _currentIndex == 1 ? Colors.blue : Colors.grey,
-            ),
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AttendanceHistoryScreen(),
-                ),
-              );
-            },
-          ),
-
-          const SizedBox(width: 40),
-          IconButton(
-            icon: Icon(
-              Icons.bar_chart,
-              color: _currentIndex == 2 ? Colors.blue : Colors.grey,
-            ),
-            onPressed: () => setState(() => _currentIndex = 2),
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.person,
-              color: _currentIndex == 3 ? Colors.blue : Colors.grey,
-            ),
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showAttendanceDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -456,7 +393,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.fingerprint, size: 50, color: Colors.blue),
                 const SizedBox(height: 16),
                 const Text(
                   'Absensi',
@@ -493,26 +429,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _addAttendance();
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Absensi berhasil dicatat'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 200,
+                            child: GoogleMapsScreen(),
                           ),
-                        ),
-                        child: const Text('Konfirmasi'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              _addAttendance();
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Absensi berhasil dicatat'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Konfirmasi'),
+                          ),
+                        ],
                       ),
                     ),
                   ],

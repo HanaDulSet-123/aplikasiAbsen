@@ -1,6 +1,7 @@
 import 'package:apk_absen/dashboard/buttom_nav.dart';
-import 'package:apk_absen/views/login_screen.dart';
+import 'package:apk_absen/views/auth/login.dart';
 import 'package:apk_absen/views/profile_screen.dart';
+import 'package:apk_absen/views/register_screen.dart';
 import 'package:apk_absen/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -41,13 +42,16 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SplashScreen(),
+      initialRoute: SplashScreen.id,
       routes: {
         // Home.id: (context) => Home(),
         ButtomNav.id: (context) => ButtomNav(),
-        LoginScreen.id: (context) => LoginScreen(),
+        SplashScreen.id: (context) => SplashScreen(),
+        LoginPage.id: (context) => LoginPage(),
+        RegisterPage.id: (context) => RegisterPage(),
+        // AttendanceService.id: (context) => AttendanceService(),
         ProfileScreen.id: (context) => ProfileScreen(),
-        
+
         // home: LoginScreen(),
       },
     );

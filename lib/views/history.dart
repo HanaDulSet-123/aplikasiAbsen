@@ -1,8 +1,7 @@
-// models/attendance.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Attendance {
+class ModelHistory {
   final String id;
   final DateTime date;
   final TimeOfDay checkIn;
@@ -11,7 +10,7 @@ class Attendance {
   final String location;
   final String? notes;
 
-  Attendance({
+  ModelHistory({
     required this.id,
     required this.date,
     required this.checkIn,
@@ -21,7 +20,6 @@ class Attendance {
     this.notes,
   });
 
-  // Convert to Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -36,9 +34,8 @@ class Attendance {
     };
   }
 
-  // Create from Map
-  factory Attendance.fromMap(Map<String, dynamic> map) {
-    return Attendance(
+  factory ModelHistory.fromMap(Map<String, dynamic> map) {
+    return ModelHistory(
       id: map['id'],
       date: DateTime.parse(map['date']),
       checkIn: _parseTime(map['checkIn']),
@@ -55,61 +52,61 @@ class Attendance {
   }
 }
 
-
-class AttendanceService {
+class HistoryScreen {
   static const String _attendanceKey = 'attendance_history';
 
-  // Simpan data kehadiran
-  static Future<void> saveAttendance(Attendance attendance) async {
+  static Future<void> saveAttendance(ModelHistory attendance) async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> attendanceList = prefs.getStringList(_attendanceKey) ?? [];
-    
+    final List<String> attendanceList =
+        prefs.getStringList(_attendanceKey) ?? [];
+
     attendanceList.add(attendance.toMap().toString());
     await prefs.setStringList(_attendanceKey, attendanceList);
   }
 
-  // Ambil semua data kehadiran
-  static Future<List<Attendance>> getAttendanceHistory() async {
+  static Future<List<ModelHistory>> getAttendanceHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> attendanceList = prefs.getStringList(_attendanceKey) ?? [];
-    
+    final List<String> attendanceList =
+        prefs.getStringList(_attendanceKey) ?? [];
+
     return attendanceList.map((item) {
       final map = Map<String, dynamic>.from(item as Map);
-      return Attendance.fromMap(map);
+      return ModelHistory.fromMap(map);
     }).toList();
   }
 
-  // Filter data berdasarkan bulan
-  static Future<List<Attendance>> getAttendanceByMonth(DateTime month) async {
+  static Future<List<ModelHistory>> getAttendanceByMonth(DateTime month) async {
     final allAttendance = await getAttendanceHistory();
     return allAttendance.where((attendance) {
-      return attendance.date.year == month.year && 
-             attendance.date.month == month.month;
+      return attendance.date.year == month.year &&
+          attendance.date.month == month.month;
     }).toList();
   }
 
-  // Hapus data kehadiran
   static Future<void> deleteAttendance(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> attendanceList = prefs.getStringList(_attendanceKey) ?? [];
-    
+    final List<String> attendanceList =
+        prefs.getStringList(_attendanceKey) ?? [];
+
     attendanceList.removeWhere((item) {
       final map = Map<String, dynamic>.from(item as Map);
       return map['id'] == id;
     });
-    
+
     await prefs.setStringList(_attendanceKey, attendanceList);
   }
 }
 
-
 class AttendanceHistoryScreen extends StatefulWidget {
+  const AttendanceHistoryScreen({super.key});
+
   @override
-  _AttendanceHistoryScreenState createState() => _AttendanceHistoryScreenState();
+  _AttendanceHistoryScreenState createState() =>
+      _AttendanceHistoryScreenState();
 }
 
 class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
-  List<Attendance> _attendanceList = [];
+  List<ModelHistory> _attendanceList = [];
   DateTime _selectedMonth = DateTime.now();
   bool _isLoading = true;
 
@@ -121,9 +118,11 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
   Future<void> _loadAttendanceHistory() async {
     setState(() => _isLoading = true);
-    final history = await AttendanceService.getAttendanceByMonth(_selectedMonth);
+    final ModelHistory = await HistoryScreen.getAttendanceByMonth(
+      _selectedMonth,
+    );
     setState(() {
-      _attendanceList = history;
+      _attendanceList = ModelHistory;
       _isLoading = false;
     });
   }
@@ -135,14 +134,14 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
-    
+
     if (picked != null) {
       setState(() => _selectedMonth = picked);
       _loadAttendanceHistory();
     }
   }
 
-  Widget _buildAttendanceCard(Attendance attendance) {
+  Widget _buildAttendanceCard(ModelHistory attendance) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ListTile(
@@ -174,23 +173,35 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'hadir': return Colors.green;
-      case 'terlambat': return Colors.orange;
-      case 'izin': return Colors.blue;
-      case 'sakit': return Colors.purple;
-      case 'alfa': return Colors.red;
-      default: return Colors.grey;
+      case 'hadir':
+        return Colors.green;
+      case 'terlambat':
+        return Colors.orange;
+      case 'izin':
+        return Colors.blue;
+      case 'sakit':
+        return Colors.purple;
+      case 'alfa':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getStatusIcon(String status) {
     switch (status.toLowerCase()) {
-      case 'hadir': return Icons.check_circle;
-      case 'terlambat': return Icons.access_time;
-      case 'izin': return Icons.beach_access;
-      case 'sakit': return Icons.local_hospital;
-      case 'alfa': return Icons.cancel;
-      default: return Icons.help;
+      case 'hadir':
+        return Icons.check_circle;
+      case 'terlambat':
+        return Icons.access_time;
+      case 'izin':
+        return Icons.beach_access;
+      case 'sakit':
+        return Icons.local_hospital;
+      case 'alfa':
+        return Icons.cancel;
+      default:
+        return Icons.help;
     }
   }
 
@@ -198,7 +209,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('History Kehadiran'),
+        title: Text('HistoryScreen Kehadiran'),
         actions: [
           IconButton(
             icon: Icon(Icons.calendar_today),
@@ -209,22 +220,22 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _attendanceList.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Tidak ada data kehadiran'),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: _attendanceList.length,
-                  itemBuilder: (context, index) {
-                    return _buildAttendanceCard(_attendanceList[index]);
-                  },
-                ),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('Tidak ada data kehadiran'),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: _attendanceList.length,
+              itemBuilder: (context, index) {
+                return _buildAttendanceCard(_attendanceList[index]);
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to attendance form
@@ -235,11 +246,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   }
 }
 
-
 class AttendanceStats extends StatelessWidget {
-  final List<Attendance> attendanceList;
+  final List<ModelHistory> attendanceList;
 
-  const AttendanceStats({required this.attendanceList});
+  const AttendanceStats({super.key, required this.attendanceList});
 
   Map<String, int> _calculateStats() {
     final stats = {
@@ -277,21 +287,30 @@ class AttendanceStats extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            ...stats.entries.map((entry) => Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(child: Text(entry.key)),
-                  Text('${entry.value}'),
-                  SizedBox(width: 8),
-                  Text('(${total > 0 ? ((entry.value / total) * 100).toStringAsFixed(1) : 0}%)'),
-                ],
+            ...stats.entries.map(
+              (entry) => Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(entry.key)),
+                    Text('${entry.value}'),
+                    SizedBox(width: 8),
+                    Text(
+                      '(${total > 0 ? ((entry.value / total) * 100).toStringAsFixed(1) : 0}%)',
+                    ),
+                  ],
+                ),
               ),
-            )).toList(),
+            ),
             Divider(),
             Row(
               children: [
-                Expanded(child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                  child: Text(
+                    'Total',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Text('$total', style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),

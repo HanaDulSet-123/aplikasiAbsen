@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:apk_absen/dashboard/buttom_nav.dart';
+import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/preference/login.dart';
 import 'package:apk_absen/utils/app_image.dart';
-import 'package:apk_absen/views/login_screen.dart';
-import 'package:apk_absen/extension/navigation.dart';
+import 'package:apk_absen/views/auth/login.dart';
+import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (isLogin == true) {
         context.pushReplacementNamed(ButtomNav.id);
       } else {
-        context.push(LoginScreen());
+        context.push(LoginPage());
       }
     });
   }

@@ -1,6 +1,6 @@
 import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/preference/login.dart';
-import 'package:apk_absen/views/login_screen.dart';
+import 'package:apk_absen/views/auth/login.dart';
 import 'package:flutter/material.dart';
 
 class LogOutButton extends StatelessWidget {
@@ -11,7 +11,7 @@ class LogOutButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         PreferenceHandler.removeLogin();
-        context.push(LoginScreen());
+        context.push(LoginPage());
       },
       child: Text("Keluar"),
     );

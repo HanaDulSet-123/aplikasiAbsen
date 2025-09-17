@@ -3,36 +3,35 @@ import 'dart:io';
 import 'package:apk_absen/api/batch_api.dart';
 import 'package:apk_absen/api/register_user.dart';
 import 'package:apk_absen/api/training_service.dart';
-import 'package:apk_absen/extension/navigation.dart';
 import 'package:apk_absen/models/list_batch_model.dart' as batch_model;
 import 'package:apk_absen/models/list_training_model.dart' as training_model;
 import 'package:apk_absen/models/register_user_model.dart';
 import 'package:apk_absen/preference/login.dart';
+import 'package:apk_absen/views/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
   static const id = "/register";
 
-  const RegisterPage({super.key});
-
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool isVisibility = false;
+  bool isLoading = false;
   RegisterUserModel? user;
   String? errorMessage;
-  bool isLoading = false;
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  // State untuk Dropdown & Radio Button
   String? _selectedJk; // Untuk menampung 'L' atau 'P'
 
   List<batch_model.Datum> _batches = [];
@@ -188,138 +187,57 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Stack(
             children: [
               // Background
-              Positioned.fill(
-                child: Image.asset(
-                  "assets/images/background.png",
-                  fit: BoxFit.cover,
+              buildBackground(),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xCC1976D2),
+                      Color(0xCC42A5F5),
+                      Color(0xCC90CAF9),
+                    ],
+                  ),
                 ),
-              ),
-
-              // Konten utama
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 80),
-                    // Logo
-                    Center(
-                      child: Image.asset(
-                        "assets/images/logo_prasta_putih.png",
-                        height: 80,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-
-                    // Container putih melengkung
-                    Container(
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height * 0.8,
-                      ),
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(40),
-                          topRight: Radius.circular(40),
-                        ),
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: SingleChildScrollView(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            "Bergabung dengan Prasta",
+                          Text(
+                            "Register",
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF347338),
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 6,
+                                  color: Colors.black.withOpacity(0.7),
+                                  offset: const Offset(2, 2),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 20),
-
-                          // Input Nama Lengkap
-                          TextField(
+                          height(24),
+                          buildTextField(
+                            hintText: "Nama Lengkap",
                             controller: nameController,
-                            decoration: InputDecoration(
-                              hintText: "Nama Lengkap",
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF11261A),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFA5BF99),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF347338),
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                            ),
                           ),
-                          const SizedBox(height: 15),
-
-                          // Input Email
-                          TextField(
+                          height(16),
+                          buildTextField(
+                            hintText: "Email",
                             controller: emailController,
-                            decoration: InputDecoration(
-                              hintText: "Email Kantor",
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF11261A),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFA5BF99),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF347338),
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                            ),
                           ),
-                          const SizedBox(height: 15),
-
-                          // Input Password
-                          TextField(
+                          height(16),
+                          buildTextField(
+                            hintText: "Password",
                             controller: passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              hintText: "Kata Sandi",
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF11261A),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFA5BF99),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF347338),
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                            ),
+                            isPassword: true,
                           ),
-                          const SizedBox(height: 10),
-
                           // Pilih Gambar
                           _selectedImage != null
                               ? Column(
@@ -337,9 +255,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                   icon: const Icon(Icons.image),
                                   label: const Text("Pilih Gambar"),
                                 ),
-                          const SizedBox(height: 24),
-
-                          // Input Jenis Kelamin
                           const Text(
                             "Jenis Kelamin",
                             style: TextStyle(
@@ -376,7 +291,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                           const SizedBox(height: 15),
-
                           // Input Training ID
                           DropdownButtonFormField<int>(
                             value: _selectedTrainingId,
@@ -443,7 +357,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   },
                           ),
                           const SizedBox(height: 20),
-
+                          height(32),
                           // Tombol daftar
                           SizedBox(
                             width: double.infinity,
@@ -473,34 +387,37 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 15),
-
-                          // Sudah punya akun?
+                          height(16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
-                                "Sudah punya akun? ",
-                                style: TextStyle(color: Color(0xFF11261A)),
+                                "Sudah punya akun?",
+                                style: TextStyle(color: Colors.white),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  context.pop();
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginPage(),
+                                    ),
+                                  );
                                 },
                                 child: const Text(
-                                  "Masuk di sini",
+                                  "Login",
                                   style: TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF347338),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 30),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -509,4 +426,79 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
+  // void registerUser() async {
+  //   setState(() => isLoading = true);
+
+  //   final nama = nameController.text.trim();
+  //   final email = emailController.text.trim();
+  //   final password = passwordController.text.trim();
+
+  //   if (nama.isEmpty || email.isEmpty || password.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text("Nama, Email, dan Password tidak boleh kosong"),
+  //       ),
+  //     );
+  //     setState(() => isLoading = false);
+  //     return;
+  //   }
+
+  //   final user = User(nama: nama, email: email, password: password);
+  //   // await DbHelper.registerUser(user);
+
+  //   Future.delayed(const Duration(seconds: 1)).then((value) {
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(const SnackBar(content: Text("Pendaftaran berhasil")));
+  //     setState(() => isLoading = false);
+  //     Navigator.pushReplacementNamed(context, "/login");
+  //   });
+  // }
+
+  Container buildBackground() {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      color: Colors.white,
+      child: Center(
+        child: Image.asset(
+          "assets/image/hadir.png",
+          width: 200,
+          height: 200,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
+  TextField buildTextField({
+    String? hintText,
+    bool isPassword = false,
+    TextEditingController? controller,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword ? !isVisibility : false,
+      decoration: InputDecoration(
+        hintText: hintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
+        suffixIcon: isPassword
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    isVisibility = !isVisibility;
+                  });
+                },
+                icon: Icon(
+                  isVisibility ? Icons.visibility : Icons.visibility_off,
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+
+  SizedBox height(double h) => SizedBox(height: h);
+  SizedBox width(double w) => SizedBox(width: w);
 }
