@@ -1,293 +1,319 @@
+import 'dart:io';
+
+import 'package:apk_absen/api/register_user.dart';
+import 'package:apk_absen/models/get_user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class Profile {
-  final String id;
-  final String name;
-  final String email;
-  final String? phone;
-  final String? photoUrl;
-  final String? bio;
-  final DateTime? dateOfBirth;
-  final String? location;
-  final int followers;
-  final int following;
-  final int posts;
-
-  Profile({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.phone,
-    this.photoUrl,
-    this.bio,
-    this.dateOfBirth,
-    this.location,
-    this.followers = 0,
-    this.following = 0,
-    this.posts = 0,
-  });
-
-  Profile copyWith({
-    String? id,
-    String? name,
-    String? email,
-    String? phone,
-    String? photoUrl,
-    String? bio,
-    DateTime? dateOfBirth,
-    String? location,
-    int? followers,
-    int? following,
-    int? posts,
-  }) {
-    return Profile(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      photoUrl: photoUrl ?? this.photoUrl,
-      bio: bio ?? this.bio,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-      location: location ?? this.location,
-      followers: followers ?? this.followers,
-      following: following ?? this.following,
-      posts: posts ?? this.posts,
-    );
-  }
-}
-
-class ProfileScreen extends StatefulWidget {
-  static const String id = "profile_screen";
-  const ProfileScreen({super.key});
+class ProfilePage extends StatefulWidget {
+  static const id = '/profile';
+  const ProfilePage({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  final Profile _profile = Profile(
-    id: '1',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1234567890',
-    photoUrl: 'https://via.placeholder.com/150',
-    bio: 'Flutter Developer | Mobile App Enthusiast',
-    dateOfBirth: DateTime(1990, 5, 15),
-    location: 'Jakarta, Indonesia',
-    followers: 1248,
-    following: 567,
-    posts: 89,
-  );
+class _ProfilePageState extends State<ProfilePage> {
+  late Future<GetUserModel> futureProfile;
+  final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    futureProfile = AuthenticationAPI.getProfile();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        await _uploadImage(File(pickedFile.path));
+      }
+    } catch (e) {
+      _showErrorSnackbar("Gagal memilih gambar: $e");
+    }
+  }
+
+  Future<void> _uploadImage(File imageFile) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await AuthenticationAPI.updateFoto(imageFile: imageFile);
+
+      // Refresh data profile
+      setState(() {
+        futureProfile = AuthenticationAPI.getProfile();
+      });
+
+      _showSuccessSnackbar("Foto berhasil diperbarui");
+    } catch (e) {
+      _showErrorSnackbar("Gagal update foto: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _showSuccessSnackbar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Navigate to edit profile screen
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to settings
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ProfileHeader(profile: _profile),
-            const SizedBox(height: 24),
-            ProfileStats(profile: _profile),
-            const SizedBox(height: 24),
-            ProfileMenu(profile: _profile),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : FutureBuilder<GetUserModel>(
+              future: futureProfile,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data?.data == null) {
+                  return const Center(child: Text("Data tidak ditemukan"));
+                }
+
+                final user = snapshot.data!.data!;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Foto profil
+                      Center(
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: const Color(0xFFA5BF99),
+                              backgroundImage: user.profilePhotoUrl != null
+                                  ? NetworkImage(user.profilePhotoUrl!)
+                                  : null,
+                              child: user.profilePhotoUrl == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: CircleAvatar(
+                                backgroundColor: const Color(0xFF347338),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: _isLoading ? null : _pickImage,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Tombol Edit Profil & Keluar
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF347338),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                // TODO: ke halaman edit profil
+                              },
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        label: const Text(
+                          "Edit Profil",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                await AuthenticationAPI.logout();
+                                if (mounted) {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    "/login",
+                                  );
+                                }
+                              },
+                        icon: const Icon(Icons.logout, color: Colors.red),
+                        label: const Text(
+                          "Keluar",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Statistik singkat
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Statistik Singkat",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF11261A),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _statCard("15", "Hari Berturut"),
+                                _statCard("168", "Total Jam"),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Informasi Profil
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Informasi Profil",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF11261A),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _infoTile("Nama Lengkap", user.name ?? "-"),
+                            _infoTile("Email", user.email ?? "-"),
+                            _infoTile("Batch", user.batchKe ?? "-"),
+                            _infoTile("Pelatihan", user.trainingTitle ?? "-"),
+                            _infoTile(
+                              "Jenis Kelamin",
+                              user.jenisKelamin ?? "-",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
-}
 
-class ProfileHeader extends StatelessWidget {
-  final Profile profile;
-
-  const ProfileHeader({super.key, required this.profile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundImage: profile.photoUrl != null
-              ? NetworkImage(profile.photoUrl!)
-              : const AssetImage('assets/default_avatar.png') as ImageProvider,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          profile.name,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        if (profile.bio != null)
+  Widget _statCard(String value, String label) {
+    return Container(
+      width: 120,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFA5BF99).withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
           Text(
-            profile.bio!,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            textAlign: TextAlign.center,
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF347338),
+            ),
           ),
-        const SizedBox(height: 8),
-        if (profile.location != null)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 4),
-              Text(
-                profile.location!,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-class ProfileStats extends StatelessWidget {
-  final Profile profile;
-
-  const ProfileStats({super.key, required this.profile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildStatColumn(profile.posts, 'Posts'),
-        _buildStatColumn(profile.followers, 'Followers'),
-        _buildStatColumn(profile.following, 'Following'),
-      ],
-    );
-  }
-
-  Widget _buildStatColumn(int count, String label) {
-    return Column(
-      children: [
-        Text(
-          count.toString(),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-      ],
-    );
-  }
-}
-
-class ProfileMenu extends StatelessWidget {
-  final Profile profile;
-
-  const ProfileMenu({super.key, required this.profile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildMenuTile(
-          icon: Icons.person,
-          title: 'Edit Profile',
-          onTap: () {
-            // Navigate to edit profile
-          },
-        ),
-        _buildMenuTile(
-          icon: Icons.email,
-          title: 'Email',
-          subtitle: profile.email,
-          onTap: () {},
-        ),
-        if (profile.phone != null)
-          _buildMenuTile(
-            icon: Icons.phone,
-            title: 'Phone',
-            subtitle: profile.phone,
-            onTap: () {},
-          ),
-        if (profile.dateOfBirth != null)
-          _buildMenuTile(
-            icon: Icons.cake,
-            title: 'Date of Birth',
-            subtitle: _formatDate(profile.dateOfBirth!),
-            onTap: () {},
-          ),
-        _buildMenuTile(
-          icon: Icons.security,
-          title: 'Privacy & Security',
-          onTap: () {},
-        ),
-        _buildMenuTile(icon: Icons.help, title: 'Help & Support', onTap: () {}),
-        _buildMenuTile(
-          icon: Icons.logout,
-          title: 'Logout',
-          onTap: () {
-            _showLogoutDialog(context);
-          },
-          color: Colors.red,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenuTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(
-        title,
-        style: TextStyle(color: color, fontWeight: FontWeight.w500),
-      ),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Implement logout logic
-            },
-            child: const Text('Logout'),
-          ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(color: Color(0xFF11261A))),
         ],
       ),
+    );
+  }
+
+  Widget _infoTile(String title, String value) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF11261A),
+            ),
+          ),
+          subtitle: Text(value, style: const TextStyle(color: Colors.black87)),
+        ),
+        const Divider(),
+      ],
     );
   }
 }

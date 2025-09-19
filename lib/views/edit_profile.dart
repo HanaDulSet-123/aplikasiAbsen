@@ -1,9 +1,8 @@
 // screens/edit_profile_screen.dart
-import 'package:apk_absen/views/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  final Profile profile;
+  final profile;
 
   const EditProfileScreen({super.key, required this.profile});
 
